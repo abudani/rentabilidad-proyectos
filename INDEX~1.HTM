@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Proyectos ZIGLA — Cerrados y En Cierre</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:#151F6D; --blue:#146BF6; --red:#E85746;
+  --yellow:#FCCA34; --green:#1a9e5a;
+  --bg:#F4F6F9; --white:#fff; --text:#171717;
+  --muted:#888; --border:#E5E5E5;
+  --shadow:0 2px 8px rgba(0,0,0,.06);
+  --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* AUTH */
+.auth-screen{max-width:400px;margin:6rem auto;text-align:center;background:#fff;border-radius:12px;padding:2.5rem;box-shadow:var(--shadow);}
+.auth-screen h2{color:var(--navy);font-size:1.2rem;margin-bottom:.75rem;}
+.auth-screen p{color:var(--muted);font-size:.8rem;margin-bottom:1.5rem;line-height:1.6;}
+.btn-login{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.75rem 2rem;font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;width:100%;}
+.btn-login:hover{background:var(--navy);}
+.error-msg{background:#FEF0F0;color:#C23934;padding:.75rem 1rem;border-radius:6px;font-size:.75rem;margin:1rem 0;display:none;}
+.loading-state{text-align:center;padding:4rem 2rem;}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-state p{color:var(--muted);font-size:.8rem;}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;}
+.header-title{font-size:1.05rem;font-weight:600;}
+.header-sub{font-size:.62rem;font-weight:300;opacity:.72;margin-top:3px;}
+.header-right{display:flex;align-items:center;gap:1.25rem;}
+#user-name{font-weight:500;font-size:.68rem;}
+#logout-btn{background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8);border-radius:5px;padding:.25rem .7rem;font-family:'Montserrat',sans-serif;font-size:.62rem;cursor:pointer;}
+#logout-btn:hover{background:rgba(255,255,255,.15);}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;padding:1.25rem 1.5rem 0;}
+.kpi-card{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;box-shadow:var(--shadow);}
+.kpi-label{font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem;}
+.kpi-value{font-size:1.7rem;font-weight:700;color:var(--navy);line-height:1;}
+.kpi-sub{font-size:.6rem;color:var(--muted);margin-top:.3rem;}
+
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;padding:1rem 1.5rem 0;}
+.chart-card{background:#fff;border-radius:var(--radius);padding:1.1rem 1.2rem;box-shadow:var(--shadow);}
+.chart-title{font-size:.7rem;font-weight:600;color:var(--navy);margin-bottom:.9rem;}
+.chart-wrap{position:relative;height:220px;}
+
+/* CONTROLS */
+.controls{display:flex;gap:.6rem;padding:1rem 1.5rem 0;flex-wrap:wrap;align-items:center;}
+.controls input{padding:.45rem .8rem;border:1px solid var(--border);border-radius:6px;font-family:'Montserrat',sans-serif;font-size:.72rem;flex:1;min-width:200px;}
+.controls select{padding:.45rem .7rem;border:1px solid var(--border);border-radius:6px;font-family:'Montserrat',sans-serif;font-size:.72rem;background:#fff;cursor:pointer;}
+.count-label{font-size:.65rem;color:var(--muted);white-space:nowrap;}
+
+/* LEGEND */
+.legend{display:flex;gap:1rem;padding:.75rem 1.5rem 0;font-size:.62rem;align-items:center;}
+.leg-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
+
+/* TABLE */
+.table-wrap{padding:.75rem 1.5rem 2rem;}
+.table-scroll{overflow-x:auto;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);}
+table{width:100%;border-collapse:collapse;font-size:.72rem;}
+th{text-align:left;padding:.55rem .8rem;font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);background:#FAFAFA;border-bottom:2px solid var(--blue);white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{background:#F0F4FF;}
+td{padding:.48rem .8rem;border-bottom:1px solid #F0F0F0;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#F8FAFF;cursor:pointer;}
+.proj-name{font-weight:500;color:var(--navy);font-size:.71rem;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.client-name{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#444;}
+.tipo-badge{display:inline-block;padding:.12rem .4rem;border-radius:4px;font-size:.58rem;font-weight:600;white-space:nowrap;}
+.si{font-size:.65rem;margin-left:2px;color:var(--blue);}
+
+/* HOVER CARD */
+#hoverCard{position:fixed;z-index:9999;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:14px 16px;width:280px;pointer-events:none;opacity:0;transition:opacity .15s;font-family:'Montserrat',sans-serif;}
+#hoverCard .hc-title{font-weight:600;font-size:12px;color:#333;margin-bottom:6px;}
+#hoverCard .hc-desc{color:#555;margin-bottom:10px;font-size:11px;line-height:1.55;}
+#hoverCard .hc-team-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#aaa;margin-bottom:5px;}
+#hoverCard .hc-member{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f5f4f0;}
+#hoverCard .hc-member:last-child{border-bottom:none;}
+#hoverCard .hc-name{color:#333;font-size:11px;}
+#hoverCard .hc-hrs{color:#6c63ff;font-size:11px;font-weight:600;white-space:nowrap;margin-left:12px;}
+#hoverCard .hc-empty{color:#bbb;font-size:11px;font-style:italic;}
+#hoverCard .hc-loading{color:#aaa;font-size:11px;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div id="hoverCard"></div>
+
+<!-- AUTH VIEW -->
+<div id="auth-view" style="display:none;padding:2rem;">
+  <div class="auth-screen">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">📋</div>
+    <h2>Proyectos ZIGLA</h2>
+    <p>Iniciá sesión con tu cuenta de Salesforce para ver el tablero de proyectos cerrados y en cierre.</p>
+    <div class="error-msg" id="auth-error"></div>
+    <button class="btn-login" onclick="startLogin()">Iniciar sesión con Salesforce</button>
+  </div>
+</div>
+
+<!-- APP VIEW -->
+<div id="app-view" style="display:none;">
+
+  <header class="header">
+    <div>
+      <div class="header-title">Proyectos ZIGLA — Cerrados y En Cierre</div>
+      <div class="header-sub">Fuente: Salesforce · <span id="updated"></span></div>
+    </div>
+    <div class="header-right">
+      <div style="text-align:right;">
+        <div id="user-name"></div>
+        <div style="margin-top:3px;"><button id="logout-btn" onclick="logout()">Cerrar sesión</button></div>
+      </div>
+    </div>
+  </header>
+
+  <div id="main-loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Cargando proyectos desde Salesforce...</p>
+  </div>
+
+  <div id="main-content" style="display:none;">
+    <div class="kpi-row" id="kpis"></div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">Margen promedio por tipo de servicio</div>
+        <div class="chart-wrap"><canvas id="chartTipo"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Ingresos por año de inicio</div>
+        <div class="chart-wrap"><canvas id="chartAnio"></canvas></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="search" placeholder="🔍  Buscar proyecto o cliente...">
+      <select id="filtTipo"><option value="">Todos los tipos</option></select>
+      <select id="filtAnio"><option value="">Año cierre</option></select>
+      <select id="filtAnioInicio"><option value="">Año inicio</option></select>
+      <select id="filtEstado">
+        <option value="">Todo estado</option>
+        <option value="Proyecto finalizado">Finalizado</option>
+        <option value="En cierre">En cierre</option>
+      </select>
+      <select id="filtPM"><option value="">Todos los PMs</option></select>
+      <span class="count-label" id="count-label"></span>
+    </div>
+
+    <div class="legend">
+      <span><span class="leg-dot" style="background:#1a9e5a"></span>Margen ≥ 60%</span>
+      <span><span class="leg-dot" style="background:#c47d00"></span>Margen 40–59%</span>
+      <span><span class="leg-dot" style="background:#c0392b"></span>Margen &lt; 40%</span>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="setSort(0)">Proyecto <span class="si" id="si0"></span></th>
+              <th onclick="setSort(1)">Cliente <span class="si" id="si1"></span></th>
+              <th onclick="setSort(2)">Estado <span class="si" id="si2"></span></th>
+              <th onclick="setSort(3)">Tipo <span class="si" id="si3"></span></th>
+              <th onclick="setSort(4)">Monto USD <span class="si" id="si4"></span></th>
+              <th onclick="setSort(5)">Margen % <span class="si" id="si5"></span></th>
+              <th onclick="setSort(6)">Gastos <span class="si" id="si6"></span></th>
+              <th onclick="setSort(7)">Hrs Real <span class="si" id="si7"></span></th>
+              <th onclick="setSort(8)">Hrs Budget <span class="si" id="si8"></span></th>
+              <th onclick="setSort(9)">Año Cierre <span class="si" id="si9"></span></th>
+              <th onclick="setSort(10)">Fecha Cierre <span class="si" id="si10"></span></th>
+              <th onclick="setSort(11)">PM <span class="si" id="si11"></span></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG
+// CLIENT_ID: creá un nuevo External Client App en SF Setup para este tablero
+// REDIRECT_URI: la URL de Vercel donde vas a deployar este proyecto
+// ─────────────────────────────────────────────────────────────────────────────
+const SF_LOGIN_URL = 'https://login.salesforce.com';
+const SF_MY_DOMAIN = 'https://zigla.my.salesforce.com';
+const CLIENT_ID    = '3MVG9LBJLApeX_PAH5QHbBO8y7SU5gByxqYnpLfd3F2y5QuzZStIGPPFCH.8myUq.kVmOtF0T4yy4blWjweI9';
+const REDIRECT_URI = 'https://rentabilidad-proyectos.vercel.app/';
+const API_VERSION  = 'v62.0';
+// ─────────────────────────────────────────────────────────────────────────────
+
+let accessToken = null;
+let instanceUrl = null;
+let DATA = [];
+let sortCol = 9, sortAsc = false;
+let teamCache = {};
+let charts = {};
+
+// ── PKCE helpers ──────────────────────────────────────────────────────────────
+function b64url(arr) {
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+async function pkce() {
+  const v = crypto.getRandomValues(new Uint8Array(32));
+  const verifier = b64url(v);
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return { verifier, challenge: b64url(new Uint8Array(digest)) };
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function startLogin() {
+  const { verifier, challenge } = await pkce();
+  sessionStorage.setItem('pkce_verifier', verifier);
+  const params = new URLSearchParams({
+    response_type: 'code', client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI, code_challenge: challenge,
+    code_challenge_method: 'S256', scope: 'api'
+  });
+  window.location = `${SF_LOGIN_URL}/services/oauth2/authorize?${params}`;
+}
+
+async function exchangeCode(code) {
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code', client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI, code, code_verifier: verifier
+  });
+  const res = await fetch('/api/token', {
+    method: 'POST', body,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  });
+  if (!res.ok) { const t = await res.text().catch(()=>res.status); throw new Error(`SF ${res.status}: ${t}`); }
+  return res.json();
+}
+
+function saveSession(token) {
+  sessionStorage.setItem('sf_token', token.access_token);
+  sessionStorage.setItem('sf_instance', token.instance_url);
+  sessionStorage.setItem('sf_name', token.name || '');
+  accessToken = token.access_token;
+  instanceUrl = token.instance_url;
+}
+
+function loadSession() {
+  accessToken = sessionStorage.getItem('sf_token');
+  instanceUrl = sessionStorage.getItem('sf_instance');
+  return !!(accessToken && instanceUrl);
+}
+
+function logout() { sessionStorage.clear(); window.location = REDIRECT_URI; }
+
+// ── SF REST API ───────────────────────────────────────────────────────────────
+async function soql(query) {
+  const url = `${instanceUrl}/services/data/${API_VERSION}/query/?q=${encodeURIComponent(query)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e[0]?.message || `SF ${res.status}`); }
+  const data = await res.json();
+  return data.records;
+}
+
+async function soqlAll(query) {
+  // Maneja paginación automática con queryMore
+  let url = `${instanceUrl}/services/data/${API_VERSION}/query/?q=${encodeURIComponent(query)}`;
+  let records = [];
+  while (url) {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e[0]?.message || `SF ${res.status}`); }
+    const data = await res.json();
+    records = records.concat(data.records);
+    url = data.done ? null : `${instanceUrl}${data.nextRecordsUrl}`;
+  }
+  return records;
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadData() {
+  const [projects, gastosRecs] = await Promise.all([
+    soqlAll(`SELECT Id, Nombre_del_proyecto__c, Estado__c, Tipo_de_servicio__c,
+             Nombre_Organizaci_n_Primaria__r.Name, Monto_ajustado_USD__c,
+             Margen_bruto_porcentaje__c, Hrs_Equivalentes_Sr__c,
+             Hrs_Equivalentes_Sr_budget__c, A_o_cierre__c,
+             Fecha_real_de_cierre__c, PM_del_Proyecto__r.Name,
+             Fecha_real_de_inicio__c, Descripci_n_del_proyecto__c
+             FROM Proyectos__c
+             WHERE Estado__c IN ('Proyecto finalizado','En cierre')
+             ORDER BY Fecha_real_de_cierre__c DESC NULLS LAST`),
+    // ⚠ Verificá el nombre del campo de monto en Gastos__c (puede ser Monto__c, Importe__c, etc.)
+    soqlAll(`SELECT Proyectos__c, SUM(Monto__c) total FROM Gastos__c GROUP BY Proyectos__c`)
+      .catch(() => [])
+  ]);
+
+  const gastosMap = {};
+  gastosRecs.forEach(r => { if (r.Proyectos__c) gastosMap[r.Proyectos__c] = Math.round(r.total || 0); });
+
+  DATA = projects.map(p => {
+    const tipo_raw = p.Tipo_de_servicio__c || '';
+    const tipo = tipo_raw.split(';')[0].trim();
+    let margen = p.Margen_bruto_porcentaje__c != null ? +p.Margen_bruto_porcentaje__c : null;
+    if (margen != null && (margen > 200 || margen < -500)) margen = null;
+    const anio_inicio = p.Fecha_real_de_inicio__c ? +p.Fecha_real_de_inicio__c.slice(0,4) : null;
+    const anio_cierre = p.A_o_cierre__c ? +p.A_o_cierre__c : null;
+    return [
+      p.Nombre_del_proyecto__c || '',               // 0 nombre
+      p.Nombre_Organizaci_n_Primaria__r?.Name || '',// 1 cliente
+      p.Estado__c || '',                            // 2 estado
+      tipo,                                         // 3 tipo
+      +(p.Monto_ajustado_USD__c || 0),              // 4 monto
+      margen,                                       // 5 margen%
+      gastosMap[p.Id] || 0,                         // 6 gastos
+      +(p.Hrs_Equivalentes_Sr__c || 0),             // 7 hrs real
+      +(p.Hrs_Equivalentes_Sr_budget__c || 0),      // 8 hrs budget
+      anio_cierre,                                  // 9 año cierre
+      p.Fecha_real_de_cierre__c || '',              // 10 fecha cierre
+      p.PM_del_Proyecto__r?.Name || '',             // 11 pm
+      p.Id,                                         // 12 id
+      anio_inicio,                                  // 13 año inicio
+      (p.Descripci_n_del_proyecto__c || '').slice(0,400),  // 14 descripcion
+    ];
+  });
+}
+
+async function loadTeam(pid) {
+  if (teamCache[pid] !== undefined) return teamCache[pid];
+  try {
+    const recs = await soql(`SELECT Contacto__r.Name n, SUM(Horas_reportadas_EqSr__c) h FROM Asignaciones__c WHERE Proyectos__c = '${pid}' GROUP BY Contacto__r.Name ORDER BY SUM(Horas_reportadas_EqSr__c) DESC LIMIT 8`);
+    const team = recs.map(r => ({ n: r.n, h: +(r.h||0) }));
+    teamCache[pid] = team;
+    return team;
+  } catch { teamCache[pid] = []; return []; }
+}
+
+// ── TIPO styles ───────────────────────────────────────────────────────────────
+const TIPO_STYLE = {
+  'Desarrollo de sistemas M&E':                  { bg:'#d1fae5', color:'#065f46' },
+  'Evaluación de resultados e impacto':           { bg:'#fee2e2', color:'#b91c1c' },
+  'Planificación Estratégica y Teoría de Cambio': { bg:'#fef3c7', color:'#b45309' },
+  'Data analytics y visualización':              { bg:'#dbeafe', color:'#1d4ed8' },
+  'Investigación y recolección de datos cuali/cuanti': { bg:'#ede9fe', color:'#5b21b6' },
+  'Capacity building':                           { bg:'#fce7f3', color:'#9d174d' },
+  'Capacity Building':                           { bg:'#fce7f3', color:'#9d174d' },
+  'Diseño de estrategias MEL':                   { bg:'#fef9c3', color:'#854d0e' },
+  'Diagnóstico y sistematización':               { bg:'#e0e7ff', color:'#3730a3' },
+  'Integración de datos y ETL':                  { bg:'#ecfdf5', color:'#166534' },
+  'Mapeo y automatización de procesos':          { bg:'#f0f9ff', color:'#0369a1' },
+  'SF - Capacitación':                           { bg:'#f0fdf4', color:'#166534' },
+  'Evaluación':           { bg:'#fee2e2', color:'#b91c1c' },
+  'Planificación / ToC':  { bg:'#fef3c7', color:'#b45309' },
+  'Soluciones Digitales': { bg:'#f0fdf4', color:'#166534' },
+  'Otro':                 { bg:'#f3f4f6', color:'#374151' },
+};
+function tipoStyle(t) {
+  const s = TIPO_STYLE[t];
+  return s ? `background:${s.bg};color:${s.color};` : 'background:#f3f4f6;color:#374151;';
+}
+
+// ── Formatters ────────────────────────────────────────────────────────────────
+const fmt  = v => (!v) ? '—' : '$' + Math.round(v).toLocaleString('es');
+const fmtH = v => (!v) ? '—' : (Math.round(v*10)/10).toLocaleString('es');
+function margenColor(m) {
+  if (m == null) return '#999';
+  if (m >= 60)   return '#1a9e5a';
+  if (m >= 40)   return '#c47d00';
+  return '#c0392b';
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+function initFilters() {
+  function populate(id, vals, desc) {
+    const sel = document.getElementById(id);
+    const sorted = [...new Set(vals.filter(v => v != null && v !== ''))];
+    if (desc) sorted.sort((a,b) => b - a); else sorted.sort((a,b) => String(a).localeCompare(String(b),'es'));
+    sorted.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+  }
+  populate('filtTipo', DATA.map(r=>r[3]));
+  populate('filtAnio', DATA.map(r=>r[9]), true);
+  populate('filtAnioInicio', DATA.map(r=>r[13]), true);
+  populate('filtPM', DATA.map(r=>r[11]));
+}
+
+function getFiltered() {
+  const q   = document.getElementById('search').value.toLowerCase();
+  const ft  = document.getElementById('filtTipo').value;
+  const fa  = document.getElementById('filtAnio').value;
+  const fai = document.getElementById('filtAnioInicio').value;
+  const fe  = document.getElementById('filtEstado').value;
+  const fpm = document.getElementById('filtPM').value;
+  return DATA.filter(r => {
+    if (ft  && r[3] !== ft) return false;
+    if (fa  && r[9] !== +fa) return false;
+    if (fai && r[13] !== +fai) return false;
+    if (fe  && r[2] !== fe) return false;
+    if (fpm && r[11] !== fpm) return false;
+    if (q && !r[0].toLowerCase().includes(q) && !r[1].toLowerCase().includes(q) && !(r[11]||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+function setSort(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = [0,1,3,11].includes(col); }
+  renderTable();
+}
+function sortData(arr) {
+  return [...arr].sort((a,b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (va==null) va = sortAsc ? '￿' : '';
+    if (vb==null) vb = sortAsc ? '￿' : '';
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb,'es') : vb.localeCompare(va,'es');
+    return sortAsc ? va-vb : vb-va;
+  });
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+function renderKPIs(filtered) {
+  const totalM = filtered.reduce((s,r)=>s+(r[4]||0),0);
+  const withMg = filtered.filter(r=>r[5]!=null);
+  const avgMg  = withMg.length ? withMg.reduce((s,r)=>s+r[5],0)/withMg.length : null;
+  const fmtM   = v => v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${Math.round(v/1e3)}k`:`$${Math.round(v)}`;
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Proyectos</div><div class="kpi-value">${filtered.length}</div><div class="kpi-sub">de ${DATA.length} total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Ingresos Totales</div><div class="kpi-value">${fmtM(totalM)}</div><div class="kpi-sub">Monto ajustado USD</div></div>
+    <div class="kpi-card"><div class="kpi-label">Margen Promedio</div><div class="kpi-value" style="color:${margenColor(avgMg)}">${avgMg!=null?Math.round(avgMg)+'%':'—'}</div><div class="kpi-sub">${withMg.length} proyectos con datos</div></div>
+    <div class="kpi-card"><div class="kpi-label">Hrs Reales</div><div class="kpi-value">${Math.round(filtered.reduce((s,r)=>s+(r[7]||0),0)).toLocaleString('es')}</div><div class="kpi-sub">Eq. Senior</div></div>
+    <div class="kpi-card"><div class="kpi-label">Gastos Totales</div><div class="kpi-value">${fmtM(filtered.reduce((s,r)=>s+(r[6]||0),0))}</div><div class="kpi-sub">USD registrados</div></div>`;
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+function renderCharts(filtered) {
+  // Margen por tipo
+  const tipoMap = {};
+  filtered.forEach(r => {
+    if (!r[3] || r[5]==null) return;
+    if (!tipoMap[r[3]]) tipoMap[r[3]] = { sum:0, cnt:0 };
+    tipoMap[r[3]].sum += r[5]; tipoMap[r[3]].cnt++;
+  });
+  const tipoE = Object.entries(tipoMap).map(([k,v])=>[k, v.sum/v.cnt]).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  if (charts.tipo) charts.tipo.destroy();
+  charts.tipo = new Chart(document.getElementById('chartTipo'), {
+    type:'bar',
+    data:{ labels: tipoE.map(([k])=>k.length>22?k.slice(0,22)+'…':k),
+           datasets:[{ data: tipoE.map(([,v])=>Math.round(v)),
+                       backgroundColor: tipoE.map(([,v])=>v>=60?'#1a9e5a':v>=40?'#c47d00':'#c0392b'),
+                       borderWidth:0, borderRadius:3 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+              plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${ctx.raw}%` } } },
+              scales:{ x:{ ticks:{ callback:v=>v+'%' }, max:100 }, y:{ ticks:{ font:{size:10} } } } }
+  });
+
+  // Ingresos por año inicio
+  const anioMap = {};
+  filtered.forEach(r => { if (!r[13]) return; anioMap[r[13]] = (anioMap[r[13]]||0)+(r[4]||0); });
+  const anioE = Object.entries(anioMap).sort((a,b)=>a[0]-b[0]);
+
+  if (charts.anio) charts.anio.destroy();
+  charts.anio = new Chart(document.getElementById('chartAnio'), {
+    type:'bar',
+    data:{ labels: anioE.map(([k])=>k), datasets:[{ data: anioE.map(([,v])=>Math.round(v)), backgroundColor:'#146BF6', borderWidth:0, borderRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+              plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` $${Math.round(ctx.raw/1000)}k` } } },
+              scales:{ y:{ ticks:{ callback:v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'k':'$'+v } } } }
+  });
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const filtered = getFiltered();
+  const sorted   = sortData(filtered);
+  [0,1,2,3,4,5,6,7,8,9,10,11].forEach(i => {
+    const el = document.getElementById('si'+i);
+    if (el) el.textContent = sortCol===i?(sortAsc?'↑':'↓'):'';
+  });
+  document.getElementById('count-label').textContent = `${filtered.length} proyectos`;
+  renderKPIs(filtered);
+  renderCharts(filtered);
+  document.getElementById('tbody').innerHTML = sorted.map(r => {
+    const mc = r[5]!=null ? `color:${margenColor(r[5])};font-weight:700;` : 'color:#ccc;';
+    const desc = (r[14]||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const name = (r[0]||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return `<tr data-id="${r[12]}" data-name="${name}" data-desc="${desc}">
+      <td><div class="proj-name">${r[0]||'—'}</div></td>
+      <td><div class="client-name">${r[1]||'—'}</div></td>
+      <td><span style="font-size:.65rem;color:${r[2]==='En cierre'?'#c47d00':'#1a9e5a'};font-weight:600;">${r[2]||'—'}</span></td>
+      <td>${r[3]?`<span class="tipo-badge" style="${tipoStyle(r[3])}">${r[3].length>18?r[3].slice(0,18)+'…':r[3]}</span>`:'—'}</td>
+      <td style="font-weight:600;color:var(--navy);">${fmt(r[4])}</td>
+      <td style="${mc}">${r[5]!=null?r[5]+'%':'—'}</td>
+      <td style="color:#555;">${fmt(r[6])}</td>
+      <td>${fmtH(r[7])}</td>
+      <td>${fmtH(r[8])}</td>
+      <td style="font-weight:600;">${r[9]||'—'}</td>
+      <td style="color:var(--muted);font-size:.67rem;">${r[10]||'—'}</td>
+      <td style="color:#555;">${r[11]||'—'}</td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('#tbody tr').forEach(tr => {
+    tr.addEventListener('mouseenter', handleRowEnter);
+    tr.addEventListener('mouseleave', () => { document.getElementById('hoverCard').style.opacity='0'; });
+    tr.addEventListener('mousemove',  handleRowMove);
+  });
+}
+
+// ── Hover card ────────────────────────────────────────────────────────────────
+let hoverTimer = null;
+async function handleRowEnter(e) {
+  const tr   = e.currentTarget;
+  const pid  = tr.dataset.id;
+  const name = tr.dataset.name;
+  const desc = tr.dataset.desc;
+  const card = document.getElementById('hoverCard');
+  card.innerHTML = `<div class="hc-title">${name}</div>${desc?`<div class="hc-desc">${desc}</div>`:''}
+    <div class="hc-team-label">Equipo</div><div class="hc-loading">Cargando…</div>`;
+  card.style.opacity = '1';
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(async () => {
+    const team = await loadTeam(pid);
+    card.innerHTML = `<div class="hc-title">${name}</div>${desc?`<div class="hc-desc">${desc}</div>`:''}
+      <div class="hc-team-label">Equipo</div>
+      ${team.length
+        ? team.map(m=>`<div class="hc-member"><span class="hc-name">${m.n}</span><span class="hc-hrs">${(Math.round(m.h*10)/10).toLocaleString('es')} h</span></div>`).join('')
+        : '<div class="hc-empty">Sin datos de equipo</div>'}`;
+  }, 400);
+}
+function handleRowMove(e) {
+  const card = document.getElementById('hoverCard');
+  const x = e.clientX + 18;
+  card.style.left = (x + 280 > window.innerWidth ? e.clientX - 298 : x) + 'px';
+  card.style.top  = Math.min(e.clientY - 10, window.innerHeight - card.offsetHeight - 10) + 'px';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+
+  if (code) {
+    window.history.replaceState({}, '', REDIRECT_URI);
+    try {
+      const token = await exchangeCode(code);
+      saveSession(token);
+    } catch(e) {
+      document.getElementById('auth-view').style.display = 'block';
+      const el = document.getElementById('auth-error');
+      el.textContent = e.message; el.style.display = 'block';
+      return;
+    }
+  } else if (!loadSession()) {
+    document.getElementById('auth-view').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('user-name').textContent = sessionStorage.getItem('sf_name') || '';
+  document.getElementById('auth-view').style.display  = 'none';
+  document.getElementById('app-view').style.display   = 'block';
+
+  try {
+    await loadData();
+    document.getElementById('updated').textContent =
+      'Actualizado: ' + new Date().toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    initFilters();
+    ['search','filtTipo','filtAnio','filtAnioInicio','filtEstado','filtPM'].forEach(id => {
+      document.getElementById(id).addEventListener(id==='search'?'input':'change', renderTable);
+    });
+    document.getElementById('main-loading').style.display  = 'none';
+    document.getElementById('main-content').style.display  = 'block';
+    renderTable();
+  } catch(err) {
+    document.getElementById('main-loading').innerHTML =
+      `<p style="color:#C23934;padding:2rem;">Error al cargar datos: ${err.message}</p>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
